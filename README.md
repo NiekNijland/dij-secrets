@@ -29,5 +29,6 @@ php artisan serve
 # Run Tests
 
 ```bash
+php artisan dusk:install
 ./vendor/bin/phpunit
 ```

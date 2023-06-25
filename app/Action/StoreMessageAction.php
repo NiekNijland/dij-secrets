@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 
 class StoreMessageAction implements Action
 {
-    public function __construct(private string $message, private ?string $colleagueEmail)
+    public function __construct(private string $message, private ?string $colleagueEmail = null)
     {
     }
 

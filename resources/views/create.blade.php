@@ -8,7 +8,7 @@
                 {{ @csrf_field() }}
                 <div class="form-group">
                     <label for="exampleInputEmail1">Bericht</label>
-                    <textarea required name="message" class="form-control" rows="5"
+                    <textarea required name="message" class="form-control" rows="5" dusk="message"
                           placeholder="Plaats hier je bericht"></textarea>
                 </div>
                 <div class="form-group">
@@ -21,7 +21,7 @@
                     </select>
                     <small id="emailHelp" class="form-text text-muted">Selecteer een collega om het bericht gelijk te delen.</small>
                 </div>
-                <button type="submit" class="btn btn-primary">Versleutel bericht</button>
+                <button type="submit" class="btn btn-primary" dusk="encrypt-message">Versleutel bericht</button>
             </form>
         </div>
     </div>

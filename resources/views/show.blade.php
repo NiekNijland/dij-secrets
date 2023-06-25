@@ -12,7 +12,7 @@
                 <div class="form-text">Bericht geplaatst om: {{ $message->created_at->format('d/m/Y H:i:s') }}</div>
             </div>
             <div class="pt-2">
-                <a class="btn btn-danger" id="destroy-message-button">
+                <a class="btn btn-danger" id="destroy-message-button" dusk="delete-message">
                     Verwijder bericht
                 </a>
             </div>

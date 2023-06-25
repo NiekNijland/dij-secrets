@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('messages', static function (Blueprint $table) {
             $table->id();
-            $table->string('message');
+            $table->text('message');
             $table->string('colleague_email')->nullable();
             $table->string('password_hash');
             $table->timestamps();
