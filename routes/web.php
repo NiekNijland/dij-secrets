@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\MessageController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,4 +14,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', [\App\Http\Controllers\MessageController::class, 'create']);
+Route::resource('messages', MessageController::class)
+    ->only(['create', 'store', 'show', 'destroy']);
+
+Route::redirect('/', route('messages.create'));

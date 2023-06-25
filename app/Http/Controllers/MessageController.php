@@ -3,79 +3,83 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Action\FetchColleaguesAction;
+use App\Action\StoreMessageAction;
+use App\Http\Requests\StoreMessageRequest;
+use App\Models\Message;
+use Hash;
 use Illuminate\Contracts\Support\Renderable;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Crypt;
 
 class MessageController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+    public function create(Request $request): Renderable
     {
-        //
+        if ($request->session()->get('messageRouteKey') !== null) {
+            return view('share');
+        }
+
+        $colleagues = Cache::remember('colleagues', 3600, static function () {
+            return (new FetchColleaguesAction())->handle();
+        });
+
+        return view('create', ['colleagues' => $colleagues]);
     }
 
-    public function create(): Renderable
+    public function store(StoreMessageRequest $request): RedirectResponse
     {
-        return view('create');
+        $validated = $request->validated();
+
+        if (!is_array($validated)) {
+            abort(Response::HTTP_BAD_REQUEST);
+        }
+
+        [$message, $password] = (new StoreMessageAction(
+            message: $validated['message'],
+            colleagueEmail: $validated['colleague_email'] ?? null,
+        ))->handle();
+
+        return back()
+            ->with('messageRouteKey', $message->getRouteKey())
+            ->with('hasEmail', $message->colleague_email !== null)
+            ->with('password', $password);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
+    public function show(Request $request, Message $message): Renderable
     {
-        //
+        if ($message->isExpired()) {
+            $message->delete();
+            return view('expired');
+        }
+
+        if (Hash::check($request->get('password'), $message->password_hash))
+        {
+            return view('show', [
+                'message' => $message,
+                'decryptedContents' => Crypt::decrypt($message->message),
+                'password' => $request->get('password')]
+            );
+        }
+
+        return view('unlock', [
+            'messageRouteKey' => $message->getRouteKey(),
+            'passwordSubmitted' => $request->has('password'),
+        ]);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
+    public function destroy(Request $request, Message $message): Response
     {
-        //
-    }
+        if (!Hash::check($request->get('password'), $message->password_hash))
+        {
+            abort(Response::HTTP_UNAUTHORIZED);
+        }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
+        $message->delete();
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
+        return response('Message deleted', 200);
     }
 }

@@ -6,7 +6,6 @@
 
     <title>{{ config('app.name') }}</title>
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-
 </head>
 <body>
 <nav class="navbar navbar-dark bg-dark">
@@ -17,5 +16,6 @@
     @yield('content')
 </div>
 <script src="{{ asset('js/app.js') }}"></script>
+@stack('scripts')
 </body>
 </html>
