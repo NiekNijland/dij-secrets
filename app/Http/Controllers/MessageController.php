@@ -12,20 +12,18 @@ use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Crypt;
+use RuntimeException;
 
 class MessageController extends Controller
 {
     public function create(Request $request): Renderable
     {
-        if ($request->session()->get('messageRouteKey') !== null) {
+        if ($request->session()->has('messageRouteKey')) {
             return view('share');
         }
 
-        $colleagues = Cache::remember('colleagues', 3600, static function () {
-            return (new FetchColleaguesAction())->handle();
-        });
+        $colleagues = (new FetchColleaguesAction())->handle();
 
         return view('create', ['colleagues' => $colleagues]);
     }
@@ -38,10 +36,15 @@ class MessageController extends Controller
             abort(Response::HTTP_BAD_REQUEST);
         }
 
-        [$message, $password] = (new StoreMessageAction(
-            message: $validated['message'],
-            colleagueEmail: $validated['colleague_email'] ?? null,
-        ))->handle();
+        try {
+            [$message, $password] = (new StoreMessageAction(
+                message: $validated['message'],
+                colleagueEmail: $validated['colleague_email'] ?? null,
+            ))->handle();
+        } catch (RuntimeException $e) {
+            abort(Response::HTTP_BAD_REQUEST, $e->getMessage());
+        }
+
 
         return back()
             ->with('messageRouteKey', $message->getRouteKey())
@@ -59,7 +62,8 @@ class MessageController extends Controller
         if (Hash::check($request->get('password'), $message->password_hash))
         {
             return view('show', [
-                'message' => $message,
+                'messageTimestamp' => $message->created_at->format('d/m/Y H:i:s'),
+                'messageRouteKey' => $message->getRouteKey(),
                 'decryptedContents' => Crypt::decrypt($message->message),
                 'password' => $request->get('password')]
             );

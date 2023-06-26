@@ -1,30 +1,28 @@
 @extends('layout')
 
 @section('content')
-    <div class="card mb-3 mx-auto">
-        <div class="card-body">
-            <h5 class="card-title">Maak een bericht</h5>
-            <form action="{{ route('messages.store') }}" method="post">
-                {{ @csrf_field() }}
-                <div class="form-group">
-                    <label for="exampleInputEmail1">Bericht</label>
-                    <textarea required name="message" class="form-control" rows="5" dusk="message"
+    <x-card title="Maak een bericht">
+
+        <form action="{{ route('messages.store') }}" method="post">
+            {{ @csrf_field() }}
+            <div class="form-group">
+                <label for="message">Bericht</label>
+                <textarea id="message" required name="message" class="form-control" rows="5" dusk="message"
                           placeholder="Plaats hier je bericht"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="exampleInputEmail1">Selecteer een collega (optioneel)</label>
-                    <select name="colleague_email" class="form-control" aria-label="colleague email">
-                        <option value="">Selecteer een collega</option>
-                        @foreach($colleagues as $colleague)
-                            <option value="{{ $colleague['email'] }}">{{ $colleague['name'] }}</option>
-                        @endforeach
-                    </select>
-                    <small id="emailHelp" class="form-text text-muted">Selecteer een collega om het bericht gelijk te delen.</small>
-                </div>
-                <button type="submit" class="btn btn-primary" dusk="encrypt-message">Versleutel bericht</button>
-            </form>
-        </div>
-    </div>
+            </div>
+            <div class="form-group">
+                <label for="colleague_email">Selecteer een collega (optioneel)</label>
+                <select id="colleague_email" name="colleague_email" class="form-control" aria-label="colleague email">
+                    <option value="">Selecteer een collega</option>
+                    @foreach($colleagues as $colleague)
+                        <option value="{{ $colleague['email'] }}">{{ $colleague['name'] }}</option>
+                    @endforeach
+                </select>
+                <small id="emailHelp" class="form-text text-muted">Selecteer een collega om het bericht gelijk te delen.</small>
+            </div>
+            <button type="submit" class="btn btn-primary" dusk="encrypt-message">Versleutel bericht</button>
+        </form>
+    </x-card>
 @endsection
 
 @push('scripts')

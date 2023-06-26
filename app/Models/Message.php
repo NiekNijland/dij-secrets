@@ -11,10 +11,11 @@ use Illuminate\Support\Carbon;
  * @property string $message
  * @property string|null $colleague_email
  * @property string $password_hash
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class Message extends Model
 {
-    use HasFactory;
     use HashidsRoutable;
 
     protected $fillable = [

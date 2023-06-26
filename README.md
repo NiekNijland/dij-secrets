@@ -30,5 +30,5 @@ php artisan serve
 
 ```bash
 php artisan dusk:install
-./vendor/bin/phpunit
+php artisan dusk
 ```
